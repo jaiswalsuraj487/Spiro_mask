@@ -39,16 +39,21 @@ class MLP(nn.Module):
         x = self.fc_layers(x)
         return x
 
+class SinActivation(nn.Module):
+    def forward(self, x):
+        return torch.sin(x)
+
+
 class MLP_sin(nn.Module):
     # MLP with sin as activation function
     def __init__(self, input_size, hidden_sizes, output_size):
-        super(MLP, self).__init__()
+        super(MLP_sin, self).__init__()
         
         fc_layers = []
         prev_size = input_size
         for size in hidden_sizes:
             fc_layers.append(nn.Linear(prev_size, size))
-            fc_layers.append(nn.ReLU())
+            fc_layers.append(SinActivation())
             prev_size = size
         fc_layers.append(nn.Linear(prev_size, output_size))
         
@@ -289,11 +294,12 @@ def model_regressor(file_name, regressor_type='RF'):
 
     y_pred = np.array(y_pred)
     return y_pred
-model_regressor(file_name= 'FVC')
-model_regressor(file_name= 'FVC', regressor_type='XGB')
-model_regressor(file_name= 'FVC', regressor_type='SVR')
+
+
 
 def train_mlp(config):
+    global output_size_global
+    global raytune_file_name
     X_train,X_val, X_test, y_train, y_val, y_test = load_data(raytune_file_name)
     # best_val_loss = float('inf')
     model = MLP(input_size=X_train.shape[1], hidden_sizes=config["hidden_size"], output_size=output_size_global)
@@ -343,10 +349,6 @@ def raytune_fun(output_size, file_name):
         )    
 
     return analysis
-
-
-
-
 
 
 
